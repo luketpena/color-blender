@@ -1,11 +1,12 @@
 import React from 'react';
 
 import ColorPicker from '../ColorPicker/ColorPicker';
+import ProgressControl from '../ProgressControl/ProgressControl';
 
 export default function App() {
   return (
     <div>
-      <h1>Hello!</h1>
+      <ProgressControl />
       <ColorPicker />
     </div>
   )
