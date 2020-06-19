@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import {useSelector} from 'react-redux';
 import styled from 'styled-components';
 import iro from '@jaames/iro';
 
@@ -29,6 +30,9 @@ const ColorButton = styled.button.attrs(props=>({
 
 export default function ColorPicker() {
 
+    const progress = useSelector(state=>state.progressReducer);
+
+    const [blendedColor, setBlendedColor] = useState('#000000');
     const [selectedColor, setSelectedColor] = useState('#000000');
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const [colorList, setColorList] = useState(['#FFF']);
@@ -71,12 +75,20 @@ export default function ColorPicker() {
         setColorList([...colorList,'#FFF']);
     }
 
+    function getBlendedColor() {
+        let currentUnit = Math.floor((colorList.length) * progress);
+        currentUnit = Math.min(currentUnit, colorList.length-1);
+        //console.log(currentUnit);
+        return currentUnit;
+    }
+
     return (
         <Container>
             {renderColorList()}
             {selectedIndex}
             <button onClick={addCell}>+</button>
             <ColorBox color={blend('#FF0000',colorList[0],1)} />
+            {getBlendedColor()}
             <div id="picker"></div>
         </Container>
     )

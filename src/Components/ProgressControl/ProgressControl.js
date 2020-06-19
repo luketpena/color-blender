@@ -12,7 +12,6 @@ export default function ProgressControl() {
     const progress = useSelector(state=>state.progressReducer);
 
     function handleProgressChange(event) {
-        console.log(event.target.value);
         dispatch({type: 'SET_PROGRESS', payload: event.target.value})
     }
 
