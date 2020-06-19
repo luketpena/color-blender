@@ -35,7 +35,7 @@ export default function ColorPicker() {
     const [blendedColor, setBlendedColor] = useState('#000000');
     const [selectedColor, setSelectedColor] = useState('#000000');
     const [selectedIndex, setSelectedIndex] = useState(-1);
-    const [colorList, setColorList] = useState(['#FFF']);
+    const [colorList, setColorList] = useState(['#F00','#0F0','#00F']);
 
     useEffect(()=>{
         var colorPicker = new iro.ColorPicker('#picker');
@@ -43,6 +43,12 @@ export default function ColorPicker() {
             setSelectedColor(color.hexString);
         });
     },[]);
+
+    useEffect(()=>{
+        if (selectedIndex!==-1) {
+            saveColor(selectedIndex);
+        }
+    },[selectedColor]);
 
     
    
@@ -76,10 +82,33 @@ export default function ColorPicker() {
     }
 
     function getBlendedColor() {
-        let currentUnit = Math.floor((colorList.length) * progress);
-        currentUnit = Math.min(currentUnit, colorList.length-1);
-        //console.log(currentUnit);
-        return currentUnit;
+        switch(colorList.length) {
+            case 0: return '#FFFFFF';
+            case 1: return colorList[0];
+            case 2: return blend(colorList[0],colorList[1],progress);
+            default:
+                let currentUnit = Math.floor((colorList.length) * progress);
+                currentUnit = Math.min(currentUnit, colorList.length-1); 
+                
+
+                let color1 = ''; 
+                let color2 = '';
+
+                if (currentUnit===colorList.length-1) {
+                    color1 = colorList[colorList.length-1];
+                    color2 = colorList[0];
+                } else {
+                    color1 = colorList[currentUnit];
+                    color2 = colorList[currentUnit+1];
+                }
+                
+
+                let localProgress = Math.min((colorList.length) * progress, colorList.length-.01) % 1;
+                console.log(currentUnit);
+                
+
+                return blend(color1,color2,localProgress);
+        }
     }
 
     return (
@@ -87,7 +116,7 @@ export default function ColorPicker() {
             {renderColorList()}
             {selectedIndex}
             <button onClick={addCell}>+</button>
-            <ColorBox color={blend('#FF0000',colorList[0],1)} />
+            <ColorBox color={getBlendedColor()} />
             {getBlendedColor()}
             <div id="picker"></div>
         </Container>
