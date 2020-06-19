@@ -61,9 +61,7 @@ export default function ProgressControl() {
     },[play, speed]);
 
     useEffect(()=>{
-        dispatch({type: 'SET_PROGRESS', payload: localProgress});
-        console.log('UPDATE');
-        
+        dispatch({type: 'SET_PROGRESS', payload: localProgress});        
     },[localProgress])
 
 

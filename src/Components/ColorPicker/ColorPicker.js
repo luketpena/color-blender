@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {useSelector} from 'react-redux';
+import {useSelector, useDispatch} from 'react-redux';
 import styled from 'styled-components';
 import iro from '@jaames/iro';
 
@@ -28,14 +28,18 @@ const ColorButton = styled.button.attrs(props=>({
     border-radius: 50%;
 `;
 
-export default function ColorPicker() {
+export default function ColorPicker(props) {
+
+    const dispatch = useDispatch();
 
     const progress = useSelector(state=>state.progressReducer);
+    const channels = useSelector(state=>state.channelsReducer);
+    const channel = useSelector(state=>state.channelsReducer[props.index]);
 
     const [blendedColor, setBlendedColor] = useState('#000000');
     const [selectedColor, setSelectedColor] = useState('#000000');
     const [selectedIndex, setSelectedIndex] = useState(-1);
-    const [colorList, setColorList] = useState(['#F00','#0F0','#00F']);
+    //const [colorList, setColorList] = useState(['#F00','#0F0','#00F']);
 
     useEffect(()=>{
         var colorPicker = new iro.ColorPicker('#picker');
@@ -53,7 +57,7 @@ export default function ColorPicker() {
     
    
     function renderColorList() {
-        return colorList.map((color,i)=>{
+        return channel.map((color,i)=>{
             return <ColorButton key={i} color={(i===selectedIndex? selectedColor : color)} selected={i===selectedIndex} onClick={()=>selectColor(i,color)}/>
         })
     }
@@ -72,41 +76,46 @@ export default function ColorPicker() {
     }
 
     function saveColor(i) {
-        var colorListCopy = [...colorList];
-        colorListCopy[i] = selectedColor;
-        setColorList(colorListCopy);
+        var channelCopy = [...channel];
+        channelCopy[i] = selectedColor;
+
+        var listCopy = [...channels];
+        listCopy[props.index] = channelCopy;
+
+        dispatch({type: 'SET_CHANNELS', payload: listCopy});
     }
 
     function addCell() {
-        setColorList([...colorList,'#FFF']);
+        var channelCopy = [...channel,'#FFF'];
+
+        var listCopy = [...channels];
+        listCopy[props.index] = channelCopy;
+
+        dispatch({type: 'SET_CHANNELS', payload: listCopy});
     }
 
     function getBlendedColor() {
-        switch(colorList.length) {
+        switch(channel.length) {
             case 0: return '#FFFFFF';
-            case 1: return colorList[0];
-            case 2: return blend(colorList[0],colorList[1],progress);
+            case 1: return channel[0];
+            case 2: return blend(channel[0],channel[1],progress);
             default:
-                let currentUnit = Math.floor((colorList.length) * progress);
-                currentUnit = Math.min(currentUnit, colorList.length-1); 
+                let currentUnit = Math.floor((channel.length) * progress);
+                currentUnit = Math.min(currentUnit, channel.length-1); 
                 
 
                 let color1 = ''; 
                 let color2 = '';
 
-                if (currentUnit===colorList.length-1) {
-                    color1 = colorList[colorList.length-1];
-                    color2 = colorList[0];
+                if (currentUnit===channel.length-1) {
+                    color1 = channel[channel.length-1];
+                    color2 = channel[0];
                 } else {
-                    color1 = colorList[currentUnit];
-                    color2 = colorList[currentUnit+1];
+                    color1 = channel[currentUnit];
+                    color2 = channel[currentUnit+1];
                 }
-                
 
-                let localProgress = Math.min((colorList.length) * progress, colorList.length-.01) % 1;
-                console.log(currentUnit);
-                
-
+                let localProgress = Math.min((channel.length) * progress, channel.length-.01) % 1;             
                 return blend(color1,color2,localProgress);
         }
     }
@@ -114,7 +123,7 @@ export default function ColorPicker() {
     return (
         <Container>
             {renderColorList()}
-            {selectedIndex}
+            {JSON.stringify(channel)}
             <button onClick={addCell}>+</button>
             <ColorBox color={getBlendedColor()} />
             {getBlendedColor()}
