@@ -39,10 +39,12 @@ export default function ColorPicker(props) {
     const [blendedColor, setBlendedColor] = useState('#000000');
     const [selectedColor, setSelectedColor] = useState('#000000');
     const [selectedIndex, setSelectedIndex] = useState(-1);
+
+    const pickerId = `picker${props.index}`;
     //const [colorList, setColorList] = useState(['#F00','#0F0','#00F']);
 
     useEffect(()=>{
-        var colorPicker = new iro.ColorPicker('#picker');
+        var colorPicker = new iro.ColorPicker(`#${pickerId}`);
         colorPicker.on('color:change', color=> {
             setSelectedColor(color.hexString);
         });
@@ -98,7 +100,6 @@ export default function ColorPicker(props) {
         switch(channel.length) {
             case 0: return '#FFFFFF';
             case 1: return channel[0];
-            case 2: return blend(channel[0],channel[1],progress);
             default:
                 let currentUnit = Math.floor((channel.length) * progress);
                 currentUnit = Math.min(currentUnit, channel.length-1); 
@@ -127,7 +128,7 @@ export default function ColorPicker(props) {
             <button onClick={addCell}>+</button>
             <ColorBox color={getBlendedColor()} />
             {getBlendedColor()}
-            <div id="picker"></div>
+            <div id={pickerId}></div>
         </Container>
     )
 }

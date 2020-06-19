@@ -4,7 +4,7 @@ const reducer = (state=[
     switch(action.type) {
         default: return state;
         case 'SET_CHANNELS': return action.payload;
-        case 'ADD_CHANNEL': return [...state, action.payload];
+        case 'ADD_CHANNEL': return [...state, ['#FFF']];
     }
 }
 
