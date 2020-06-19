@@ -50,21 +50,32 @@ export default function ColorPicker() {
 
     function selectColor(i,color) {
         if (selectedIndex!==i) {
+            if (selectedIndex!==-1) {
+                saveColor(selectedIndex);
+            }
             setSelectedIndex(i);
             setSelectedColor(color);
         } else {
             setSelectedIndex(-1);
-            var colorListCopy = [...colorList];
-            colorListCopy[i] = selectedColor;
-            setColorList(colorListCopy);
+            saveColor(i);
         }
+    }
+
+    function saveColor(i) {
+        var colorListCopy = [...colorList];
+        colorListCopy[i] = selectedColor;
+        setColorList(colorListCopy);
+    }
+
+    function addCell() {
+        setColorList([...colorList,'#FFF']);
     }
 
     return (
         <Container>
             {renderColorList()}
             {selectedIndex}
-            <button>+</button>
+            <button onClick={addCell}>+</button>
             <ColorBox color={blend('#FF0000',colorList[0],1)} />
             <div id="picker"></div>
         </Container>
