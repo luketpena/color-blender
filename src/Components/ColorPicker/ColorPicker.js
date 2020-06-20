@@ -86,6 +86,32 @@ const ColorButton = styled.button.attrs(props=>({
 const PickerBox = styled.div`
     cursor: pointer;
 `;
+
+const ModeBox = styled.div`
+    margin-bottom: 16px;
+    .active {
+        
+        &:hover {
+            transform: scale(1.1);
+            opacity: 1;
+            z-index: 10;
+        }
+    }
+`;
+
+const ModeButton = styled.button`
+    width: 50%;
+    border: none;
+    outline: none;
+    background-color: ${props=>(props.active? '#444' : '#333')};
+    padding: 4px 0;
+    opacity: .9;
+    color: ${props=>(props.active? '#AAA' : '#888')};
+    transition: all .1s;
+    position: relative;
+    cursor: pointer;
+`;
+
 //#endregion
 
 export default function ColorPicker(props) {
@@ -105,6 +131,7 @@ export default function ColorPicker(props) {
         const [mounted, setMounted] = useState(false);
         const [colorPicker, setColorPicker] = useState(null);
         const [colorHex, setColorHex] = useState('')
+        const [imgActive, setImgActive] = useState(false);
 
         //This is used to generate a unique color wheel to this component
         const pickerId = `picker${props.index}`;
@@ -258,6 +285,10 @@ export default function ColorPicker(props) {
             </ColorListBox>
             <button className={`btn btn-center ${(selectedIndex===-1? 'btn-disabled' : 'btn-active')}`} onClick={removeColor}>Remove Color</button>
             <ColorBox color={getBlendedColor()} />
+            <ModeBox>
+                <ModeButton className={`${(imgActive? 'active' : '')}`} active={imgActive} onClick={()=>setImgActive(false)}>Block</ModeButton>
+                <ModeButton className={`${(!imgActive? 'active' : '')}`} active={!imgActive} onClick={()=>setImgActive(true)}>Image</ModeButton>
+            </ModeBox>
             <PickerBox id={pickerId}></PickerBox>
             <input 
                 type="text"

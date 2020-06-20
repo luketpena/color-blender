@@ -1,6 +1,7 @@
 function Channel(index) {
     this.name = `channel_${index}`;
     this.colors = ['#ffffff'];
+    this.img_url = '';
 }
 
 const reducer = (state=[new Channel(0)], action)=>{
@@ -17,6 +18,10 @@ const reducer = (state=[new Channel(0)], action)=>{
             let channelCopy = [...state];
             channelCopy[action.payload.index].name = action.payload.name;
             return channelCopy;
+        case 'SET_CHANNEL_IMG':
+            let setImgCopy = [...state];
+            setImgCopy[action.payload.index].img_url = action.payload.img_url;
+            return setImgCopy;
         case 'UPDATE_COLOR':
             let updateColorCopy = [...state];
             updateColorCopy[action.payload.channelIndex].colors[action.payload.colorIndex] = action.payload.color;
