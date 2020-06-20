@@ -7,6 +7,11 @@ import blend from '../../Modules/blend';
 
 const Container = styled.div`
     width: 256px;
+    background-color: #222;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 16px 32px -16px ${props=>props.color}55;
+    margin: 16px 24px;
 `;
 
 const ColorBox = styled.div.attrs(props=>({
@@ -23,7 +28,7 @@ const ColorListBox = styled.div`
     margin: 16px 0;
     padding: 4px;
     border-radius: 8px;
-    background-color: #222;
+    background-color: #111;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -154,7 +159,7 @@ export default function ColorPicker(props) {
     }
 
     return (
-        <Container onMouseLeave={()=>setSelectedIndex(-1)}>
+        <Container onMouseLeave={()=>setSelectedIndex(-1)} color={getBlendedColor()}>
             <button className="btn btn-center btn-active" onClick={addColor}>Add Color</button>
             <ColorListBox>
                 {renderColorList()}

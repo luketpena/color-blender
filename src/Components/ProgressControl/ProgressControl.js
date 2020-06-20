@@ -10,14 +10,22 @@ const ProgressSlider = styled.input`
 `;
 
 const PlayBox = styled.div`
+    margin: 16px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;    
     
     #play {
         font-size: 48px;
         color: white;
+        cursor: pointer;
+        transition: transform .2s;
+        margin-right: 16px;
+        &:hover {
+            transform: scale(1.2);
+        }
     }
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    
 `;
 
 const SpeedList = styled.div`
@@ -29,11 +37,16 @@ const SpeedList = styled.div`
         display: block;
         height: 32px;
         margin: 4px;    
+        cursor: pointer;
     }
 `;
 
 const SpeedIcon = styled.div`
-    color: ${(props=> (props.selected===props.index? 'white' : 'gray') )}
+    color: ${(props=> (props.selected===props.index? 'white' : 'gray') )};
+    transition: transform .2s;
+    &:hover {
+        transform: scale(1.2);
+    }
 `;
 
 const speedList = [
