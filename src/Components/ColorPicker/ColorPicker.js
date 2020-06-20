@@ -30,7 +30,7 @@ const Container = styled.div`
         }
     }
 
-    .in-name {
+    .in-name, .in-colorHex {
         width: 100%;
         margin-bottom: 16px;
         background: none;
@@ -38,6 +38,11 @@ const Container = styled.div`
         border: none;
         border-bottom: 1px solid #333;
         color: #BBB;
+    }
+
+    .in-colorHex {
+        margin-top: 16px;
+        text-align: center;
     }
 `;
 
@@ -86,45 +91,47 @@ const PickerBox = styled.div`
 export default function ColorPicker(props) {
 
     //#region Setup
-    const dispatch = useDispatch();
+        const dispatch = useDispatch();
 
-    /*--------< REDUCERS >--------*/
-    const progress = useSelector(state=>state.progressReducer);
-    const channels = useSelector(state=>state.channelsReducer);
-    const channel = useSelector(state=>state.channelsReducer[props.index]);
-    const colorList = useSelector(state=>state.channelsReducer[props.index].colors);
+        /*--------< REDUCERS >--------*/
+        const progress = useSelector(state=>state.progressReducer);
+        const channels = useSelector(state=>state.channelsReducer);
+        const channel = useSelector(state=>state.channelsReducer[props.index]);
+        const colorList = useSelector(state=>state.channelsReducer[props.index].colors);
 
-    /*--------< STATES >--------*/
-    const [selectedColor, setSelectedColor] = useState('#000000');
-    const [selectedIndex, setSelectedIndex] = useState(-1);
-    const [mounted, setMounted] = useState(false);
-    const [colorPicker, setColorPicker] = useState(null);
+        /*--------< STATES >--------*/
+        const [selectedColor, setSelectedColor] = useState('#000000');
+        const [selectedIndex, setSelectedIndex] = useState(-1);
+        const [mounted, setMounted] = useState(false);
+        const [colorPicker, setColorPicker] = useState(null);
+        const [colorHex, setColorHex] = useState('')
 
-    //This is used to generate a unique color wheel to this component
-    const pickerId = `picker${props.index}`;
+        //This is used to generate a unique color wheel to this component
+        const pickerId = `picker${props.index}`;
     //#endregion
 
     //#region Effects
-    useEffect(()=>{
-        var colorPickerInst = new iro.ColorPicker(`#${pickerId}`,{width: 256});
-        colorPickerInst.on('color:change', color=> {
-            setSelectedColor(color.hexString);
-        });
-        setColorPicker(colorPickerInst);
-    },[]);
-    
-    useEffect(()=>{
-        if (selectedIndex!==-1) {
-           saveColor(selectedIndex);
-        }
-    },[selectedColor]);
+        useEffect(()=>{
+            var colorPickerInst = new iro.ColorPicker(`#${pickerId}`,{width: 256});
+            colorPickerInst.on('color:change', color=> {
+                setSelectedColor(color.hexString);
+            });
+            setColorPicker(colorPickerInst);
+        },[]);
+        
+        useEffect(()=>{
+            setColorHex(selectedColor);
+            if (selectedIndex!==-1) {
+                saveColor(selectedIndex);     
+            }
+        },[selectedColor]);
 
-    useEffect(()=>{
-        if (mounted) {
-            setSelectedColor(colorList[colorList.length-1]);
-            setSelectedIndex(colorList.length-1);
-        } else setMounted(true);
-    },[colorList.length])
+        useEffect(()=>{
+            if (mounted) {
+                setSelectedColor(colorList[colorList.length-1]);
+                setSelectedIndex(colorList.length-1);
+            } else setMounted(true);
+        },[colorList.length])
     //#endregion
 
     //#region Methods
@@ -142,6 +149,7 @@ export default function ColorPicker(props) {
             setSelectedIndex(i);
             setSelectedColor(color);
             colorPicker.color.hexString = color;
+            //setColorHex(color);
         } else {
             setSelectedIndex(-1);
             saveColor(i);
@@ -217,6 +225,21 @@ export default function ColorPicker(props) {
                 return blend(color1,color2,localProgress);
         }
     }
+
+    function handleColorHexChange(event) {
+        let color = event.target.value;
+
+        //Prevent the hex code from losing its hex
+        if (color!=='') {
+            setColorHex(color);
+            setSelectedColor(color);
+            
+            //Only set the color picker a legitimate hex code
+            if (color.charAt(0)==='#' && color.length===7) {
+                colorPicker.color.hexString = color;
+            }
+        }
+    }
     //#endregion
 
     return (
@@ -236,6 +259,12 @@ export default function ColorPicker(props) {
             <button className={`btn btn-center ${(selectedIndex===-1? 'btn-disabled' : 'btn-active')}`} onClick={removeColor}>Remove Color</button>
             <ColorBox color={getBlendedColor()} />
             <PickerBox id={pickerId}></PickerBox>
+            <input 
+                type="text"
+                className="in-colorHex"
+                value={colorHex}
+                onChange={event=>handleColorHexChange(event)}
+            />
         </Container>
     )
 }
