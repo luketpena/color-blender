@@ -8,6 +8,10 @@ const reducer = (state=[new Channel()], action)=>{
         default: return state;
         case 'SET_CHANNELS': return action.payload;
         case 'ADD_CHANNEL': return [...state, new Channel()];
+        case 'REMOVE_CHANNEL':
+            let removeChannelCopy = [...state];
+            removeChannelCopy.splice(action.payload,1);
+            return removeChannelCopy;
         case 'SET_CHANNEL_NAME':
             let channelCopy = [...state];
             channelCopy[action.payload.index].name = action.payload.name;

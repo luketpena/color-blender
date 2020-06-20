@@ -1,4 +1,6 @@
 import React, {useState, useEffect} from 'react';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faTimes} from '@fortawesome/free-solid-svg-icons'
 import {useSelector, useDispatch} from 'react-redux';
 import styled from 'styled-components';
 import iro from '@jaames/iro';
@@ -13,6 +15,19 @@ const Container = styled.div`
     border: 1px solid #333;
     box-shadow: 0 16px 32px -16px black;
     margin: 16px 24px;
+    position: relative;
+
+    .delete-btn {
+        position: absolute;
+        right: 16px;
+        top: 16px;
+        color: #555;
+        cursor: pointer;
+        transition: color .2s;
+        &:hover {
+            color: #AAA;
+        }
+    }
 
     .in-name {
         width: 100%;
@@ -164,6 +179,13 @@ export default function ColorPicker(props) {
         dispatch({type: 'SET_CHANNELS', payload: listCopy});
     }
 
+    function removeChannel() {
+        let q = window.confirm("Do you want to remove this channel?");
+        if (q) {
+            dispatch({type: 'REMOVE_CHANNEL', payload: props.index})
+        }
+    }
+
     function getBlendedColor() {
         switch(colorList.length) {
             case 0: return '#FFFFFF';
@@ -190,7 +212,8 @@ export default function ColorPicker(props) {
     }
 
     return (
-        <Container onMouseLeave={()=>setSelectedIndex(-1)} color={getBlendedColor()}>
+        <Container onMouseLeave={()=>setSelectedIndex(-1)}>
+            <FontAwesomeIcon className="delete-btn" icon={faTimes} onClick={removeChannel}/>
             <input 
                 type="text" 
                 className="in-name"
