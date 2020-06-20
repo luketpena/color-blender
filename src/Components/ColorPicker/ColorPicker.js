@@ -6,7 +6,7 @@ import iro from '@jaames/iro';
 import blend from '../../Modules/blend';
 
 const Container = styled.div`
-
+    width: 256px;
 `;
 
 const ColorBox = styled.div.attrs(props=>({
@@ -14,18 +14,36 @@ const ColorBox = styled.div.attrs(props=>({
         backgroundColor: props.color,
     },
 }))`width: 250px;
-    height: 100px;`;
-    
+    height: 16px;
+    border-radius: 8px;
+    margin: 8px 0;
+    `;
+
+const ColorListBox = styled.div`
+    margin: 16px 0;
+    padding: 4px;
+    border-radius: 8px;
+    background-color: #222;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+`;
+
 const ColorButton = styled.button.attrs(props=>({
     style: {
         backgroundColor: props.color,
-        border: (props.selected? '1px solid red' : '1px solid rgba(0,0,0,0)')
+        
     },
 }))`
     height: 24px;
     width: 24px;
     outline: none;
     border-radius: 50%;
+    margin: 4px;
+    transition: transform .2s;
+    cursor: pointer;
+    border: ${props=>(props.selected? '2px solid white' : '2px solid rgba(0,0,0,0)')};
+    transform: scale(${props=>(props.selected? '1.5' : '1.0')});
 `;
 
 export default function ColorPicker(props) {
@@ -36,15 +54,14 @@ export default function ColorPicker(props) {
     const channels = useSelector(state=>state.channelsReducer);
     const channel = useSelector(state=>state.channelsReducer[props.index]);
 
-    const [blendedColor, setBlendedColor] = useState('#000000');
     const [selectedColor, setSelectedColor] = useState('#000000');
     const [selectedIndex, setSelectedIndex] = useState(-1);
+    const [mounted, setMounted] = useState(false);
 
     const pickerId = `picker${props.index}`;
-    //const [colorList, setColorList] = useState(['#F00','#0F0','#00F']);
 
     useEffect(()=>{
-        var colorPicker = new iro.ColorPicker(`#${pickerId}`);
+        var colorPicker = new iro.ColorPicker(`#${pickerId}`,{width: 256});
         colorPicker.on('color:change', color=> {
             setSelectedColor(color.hexString);
         });
@@ -56,7 +73,12 @@ export default function ColorPicker(props) {
         }
     },[selectedColor]);
 
-    
+    useEffect(()=>{
+        if (mounted) {
+            setSelectedColor(channel[channel.length-1]);
+            setSelectedIndex(channel.length-1);
+        } else setMounted(true);
+    },[channel.length])
    
     function renderColorList() {
         return channel.map((color,i)=>{
@@ -87,13 +109,23 @@ export default function ColorPicker(props) {
         dispatch({type: 'SET_CHANNELS', payload: listCopy});
     }
 
-    function addCell() {
+    function addColor() {
         var channelCopy = [...channel,'#FFF'];
 
         var listCopy = [...channels];
         listCopy[props.index] = channelCopy;
-
         dispatch({type: 'SET_CHANNELS', payload: listCopy});
+    }
+
+    function removeColor() {
+        if (selectedIndex!==-1) {
+            var channelCopy = [...channel];
+            channelCopy.splice(selectedIndex,1);
+
+            var listCopy = [...channels];
+            listCopy[props.index] = channelCopy;
+            dispatch({type: 'SET_CHANNELS', payload: listCopy});
+        }
     }
 
     function getBlendedColor() {
@@ -122,12 +154,13 @@ export default function ColorPicker(props) {
     }
 
     return (
-        <Container>
-            {renderColorList()}
-            {JSON.stringify(channel)}
-            <button onClick={addCell}>+</button>
+        <Container onMouseLeave={()=>setSelectedIndex(-1)}>
+            <button className="btn btn-center btn-active" onClick={addColor}>Add Color</button>
+            <ColorListBox>
+                {renderColorList()}
+            </ColorListBox>
+            <button className={`btn btn-center ${(selectedIndex===-1? 'btn-disabled' : 'btn-active')}`} onClick={removeColor}>Remove Color</button>
             <ColorBox color={getBlendedColor()} />
-            {getBlendedColor()}
             <div id={pickerId}></div>
         </Container>
     )

@@ -26,7 +26,7 @@ export default function App() {
   return (
     <div>
       <ProgressControl />
-      <button onClick={addChannel}>Add Channel</button>
+      <button className="btn btn-center" onClick={addChannel}>Add Channel</button>
       <ChannelBox>
         {renderChannels()}
       </ChannelBox>
