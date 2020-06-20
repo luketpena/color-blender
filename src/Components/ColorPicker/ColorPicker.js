@@ -58,10 +58,12 @@ export default function ColorPicker(props) {
     const progress = useSelector(state=>state.progressReducer);
     const channels = useSelector(state=>state.channelsReducer);
     const channel = useSelector(state=>state.channelsReducer[props.index]);
+    const colorList = useSelector(state=>state.channelsReducer[props.index].colors);
 
     const [selectedColor, setSelectedColor] = useState('#000000');
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const [mounted, setMounted] = useState(false);
+    const [name, setName] = useState('');
 
     const pickerId = `picker${props.index}`;
 
@@ -71,25 +73,28 @@ export default function ColorPicker(props) {
             setSelectedColor(color.hexString);
         });
     },[]);
+    
 
     useEffect(()=>{
         if (selectedIndex!==-1) {
-            saveColor(selectedIndex);
+           saveColor(selectedIndex);
         }
     },[selectedColor]);
 
     useEffect(()=>{
         if (mounted) {
-            setSelectedColor(channel[channel.length-1]);
-            setSelectedIndex(channel.length-1);
+            setSelectedColor(colorList[colorList.length-1]);
+            setSelectedIndex(colorList.length-1);
         } else setMounted(true);
-    },[channel.length])
+    },[colorList.length])
    
     function renderColorList() {
-        return channel.map((color,i)=>{
+        return colorList.map((color,i)=>{
             return <ColorButton key={i} color={(i===selectedIndex? selectedColor : color)} selected={i===selectedIndex} onClick={()=>selectColor(i,color)}/>
         })
     }
+
+  
 
     function selectColor(i,color) {
         if (selectedIndex!==i) {
@@ -104,62 +109,70 @@ export default function ColorPicker(props) {
         }
     }
 
+
     function saveColor(i) {
-        var channelCopy = [...channel];
-        channelCopy[i] = selectedColor;
+        var channelCopy = {...channel};
+        channelCopy.colors[i] = selectedColor;
 
-        var listCopy = [...channels];
-        listCopy[props.index] = channelCopy;
-
-        dispatch({type: 'SET_CHANNELS', payload: listCopy});
+        updateChannel(channelCopy);
     }
 
     function addColor() {
-        var channelCopy = [...channel,'#FFF'];
+        var channelCopy = {...colorList};
+        channelCopy.colors.push('#FFF');
 
-        var listCopy = [...channels];
-        listCopy[props.index] = channelCopy;
-        dispatch({type: 'SET_CHANNELS', payload: listCopy});
+        updateChannel(channelCopy);
     }
 
     function removeColor() {
         if (selectedIndex!==-1) {
-            var channelCopy = [...channel];
-            channelCopy.splice(selectedIndex,1);
+            var channelCopy = {...colorList};
+            channelCopy.colors.splice(selectedIndex,1);
 
-            var listCopy = [...channels];
-            listCopy[props.index] = channelCopy;
-            dispatch({type: 'SET_CHANNELS', payload: listCopy});
+            updateChannel(channelCopy);
         }
     }
 
+    function updateChannel(newVersion) {
+        var listCopy = [...channels];
+        listCopy[props.index] = newVersion;
+        dispatch({type: 'SET_CHANNELS', payload: listCopy});
+    }
+
     function getBlendedColor() {
-        switch(channel.length) {
+        switch(colorList.length) {
             case 0: return '#FFFFFF';
-            case 1: return channel[0];
+            case 1: return colorList[0];
             default:
-                let currentUnit = Math.floor((channel.length) * progress);
-                currentUnit = Math.min(currentUnit, channel.length-1); 
+                let currentUnit = Math.floor((colorList.length) * progress);
+                currentUnit = Math.min(currentUnit, colorList.length-1); 
                 
 
                 let color1 = ''; 
                 let color2 = '';
 
-                if (currentUnit===channel.length-1) {
-                    color1 = channel[channel.length-1];
-                    color2 = channel[0];
+                if (currentUnit===colorList.length-1) {
+                    color1 = colorList[colorList.length-1];
+                    color2 = colorList[0];
                 } else {
-                    color1 = channel[currentUnit];
-                    color2 = channel[currentUnit+1];
+                    color1 = colorList[currentUnit];
+                    color2 = colorList[currentUnit+1];
                 }
 
-                let localProgress = Math.min((channel.length) * progress, channel.length-.01) % 1;             
+                let localProgress = Math.min((colorList.length) * progress, colorList.length-.01) % 1;             
                 return blend(color1,color2,localProgress);
         }
     }
 
     return (
         <Container onMouseLeave={()=>setSelectedIndex(-1)} color={getBlendedColor()}>
+            {JSON.stringify(channel)}
+            <input 
+                type="text" 
+                placeholder="colorList Name" 
+                value={channel.name} 
+                onChange={event=>dispatch({type: 'SET_CHANNEL_NAME', payload: {index: props.index, name: event.target.value}})}
+            />
             <button className="btn btn-center btn-active" onClick={addColor}>Add Color</button>
             <ColorListBox>
                 {renderColorList()}
