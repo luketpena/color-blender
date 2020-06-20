@@ -12,6 +12,16 @@ const Container = styled.div`
     border-radius: 16px;
     box-shadow: 0 16px 32px -16px ${props=>props.color}55;
     margin: 16px 24px;
+
+    .in-name {
+        width: 100%;
+        margin-bottom: 16px;
+        background: none;
+        outline: none;
+        border: none;
+        border-bottom: 1px solid #333;
+        color: #BBB;
+    }
 `;
 
 const ColorBox = styled.div.attrs(props=>({
@@ -109,6 +119,12 @@ export default function ColorPicker(props) {
         }
     }
 
+    function changeName(event) {
+        let string = event.target.value;
+        if (string.charAt(string.length-1)!==' ') {
+            dispatch({type: 'SET_CHANNEL_NAME', payload: {index: props.index, name: event.target.value}})
+        }
+    }
 
     function saveColor(i) {
         var channelCopy = {...channel};
@@ -166,12 +182,12 @@ export default function ColorPicker(props) {
 
     return (
         <Container onMouseLeave={()=>setSelectedIndex(-1)} color={getBlendedColor()}>
-            {JSON.stringify(channel)}
             <input 
                 type="text" 
-                placeholder="colorList Name" 
+                className="in-name"
+                placeholder="channel_name" 
                 value={channel.name} 
-                onChange={event=>dispatch({type: 'SET_CHANNEL_NAME', payload: {index: props.index, name: event.target.value}})}
+                onChange={event=>changeName(event)}
             />
             <button className="btn btn-center btn-active" onClick={addColor}>Add Color</button>
             <ColorListBox>
