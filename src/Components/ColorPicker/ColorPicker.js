@@ -174,7 +174,7 @@ export default function ColorPicker(props) {
 
     function addColor() {
         var channelCopy = {...channel};
-        channelCopy.colors.push('#FFF');
+        channelCopy.colors.push('#ffffff');
 
         updateChannel(channelCopy);
     }

@@ -4,6 +4,7 @@ import {useSelector, useDispatch} from 'react-redux';
 
 import ColorPicker from '../ColorPicker/ColorPicker';
 import ProgressControl from '../ProgressControl/ProgressControl';
+import Menu from '../Menu/Menu';
 
 const ChannelBox = styled.div`
   display: flex;
@@ -30,8 +31,10 @@ export default function App() {
 
   return (
     <div>
+      <Menu />
       <ProgressControl />
       <button className="btn btn-center btn-active" onClick={addChannel}>Add Channel</button>
+      
       <ChannelBox>
         {renderChannels()}
       </ChannelBox>

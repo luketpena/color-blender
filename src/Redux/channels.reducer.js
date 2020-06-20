@@ -1,13 +1,14 @@
-function Channel() {
-    this.name = '';
-    this.colors = ['#FFF'];
+function Channel(index) {
+    this.name = `channel_${index}`;
+    this.colors = ['#ffffff'];
 }
 
-const reducer = (state=[new Channel()], action)=>{
+const reducer = (state=[new Channel(0)], action)=>{
     switch(action.type) {
         default: return state;
         case 'SET_CHANNELS': return action.payload;
-        case 'ADD_CHANNEL': return [...state, new Channel()];
+        case 'RESET_CHANNELS': return [new Channel(0)];
+        case 'ADD_CHANNEL': return [...state, new Channel(state.length)];
         case 'REMOVE_CHANNEL':
             let removeChannelCopy = [...state];
             removeChannelCopy.splice(action.payload,1);
