@@ -10,7 +10,8 @@ const Container = styled.div`
     background-color: #222;
     padding: 24px;
     border-radius: 16px;
-    box-shadow: 0 16px 32px -16px ${props=>props.color}55;
+    border: 1px solid #333;
+    box-shadow: 0 16px 32px -16px black;
     margin: 16px 24px;
 
     .in-name {
@@ -61,6 +62,10 @@ const ColorButton = styled.button.attrs(props=>({
     transform: scale(${props=>(props.selected? '1.5' : '1.0')});
 `;
 
+const PickerBox = styled.div`
+    cursor: pointer;
+`;
+
 export default function ColorPicker(props) {
 
     const dispatch = useDispatch();
@@ -75,13 +80,16 @@ export default function ColorPicker(props) {
     const [mounted, setMounted] = useState(false);
     const [name, setName] = useState('');
 
+    const [colorPicker, setColorPicker] = useState(null);
+
     const pickerId = `picker${props.index}`;
 
     useEffect(()=>{
-        var colorPicker = new iro.ColorPicker(`#${pickerId}`,{width: 256});
-        colorPicker.on('color:change', color=> {
+        var colorPickerInst = new iro.ColorPicker(`#${pickerId}`,{width: 256});
+        colorPickerInst.on('color:change', color=> {
             setSelectedColor(color.hexString);
         });
+        setColorPicker(colorPickerInst);
     },[]);
     
 
@@ -104,8 +112,6 @@ export default function ColorPicker(props) {
         })
     }
 
-  
-
     function selectColor(i,color) {
         if (selectedIndex!==i) {
             if (selectedIndex!==-1) {
@@ -113,6 +119,7 @@ export default function ColorPicker(props) {
             }
             setSelectedIndex(i);
             setSelectedColor(color);
+            colorPicker.color.hexString = color;
         } else {
             setSelectedIndex(-1);
             saveColor(i);
@@ -127,14 +134,16 @@ export default function ColorPicker(props) {
     }
 
     function saveColor(i) {
-        var channelCopy = {...channel};
-        channelCopy.colors[i] = selectedColor;
-
-        updateChannel(channelCopy);
+        let newColor = {
+            channelIndex: props.index,
+            colorIndex: i,
+            color: selectedColor,
+        }
+        dispatch({type: 'UPDATE_COLOR', payload: newColor});
     }
 
     function addColor() {
-        var channelCopy = {...colorList};
+        var channelCopy = {...channel};
         channelCopy.colors.push('#FFF');
 
         updateChannel(channelCopy);
@@ -195,7 +204,7 @@ export default function ColorPicker(props) {
             </ColorListBox>
             <button className={`btn btn-center ${(selectedIndex===-1? 'btn-disabled' : 'btn-active')}`} onClick={removeColor}>Remove Color</button>
             <ColorBox color={getBlendedColor()} />
-            <div id={pickerId}></div>
+            <PickerBox id={pickerId}></PickerBox>
         </Container>
     )
 }

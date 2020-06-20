@@ -1,18 +1,21 @@
-const reducer = (state=[
-    {
-        name: '',
-        colors: ['#F00','#0F0','#F0F'],
-    }
-    
-], action)=>{
+function Channel() {
+    this.name = '';
+    this.colors = ['#FFF'];
+}
+
+const reducer = (state=[new Channel()], action)=>{
     switch(action.type) {
         default: return state;
         case 'SET_CHANNELS': return action.payload;
-        case 'ADD_CHANNEL': return [...state, ['#FFF']];
+        case 'ADD_CHANNEL': return [...state, new Channel()];
         case 'SET_CHANNEL_NAME':
             let channelCopy = [...state];
             channelCopy[action.payload.index].name = action.payload.name;
             return channelCopy;
+        case 'UPDATE_COLOR':
+            let updateColorCopy = [...state];
+            updateColorCopy[action.payload.channelIndex].colors[action.payload.colorIndex] = action.payload.color;
+            return updateColorCopy;
     }
 }
 
