@@ -7,6 +7,7 @@ import iro from '@jaames/iro';
 
 import blend from '../../Modules/blend';
 
+//#region Styling
 const Container = styled.div`
     width: 256px;
     background-color: #222;
@@ -80,25 +81,30 @@ const ColorButton = styled.button.attrs(props=>({
 const PickerBox = styled.div`
     cursor: pointer;
 `;
+//#endregion
 
 export default function ColorPicker(props) {
 
+    //#region Setup
     const dispatch = useDispatch();
 
+    /*--------< REDUCERS >--------*/
     const progress = useSelector(state=>state.progressReducer);
     const channels = useSelector(state=>state.channelsReducer);
     const channel = useSelector(state=>state.channelsReducer[props.index]);
     const colorList = useSelector(state=>state.channelsReducer[props.index].colors);
 
+    /*--------< STATES >--------*/
     const [selectedColor, setSelectedColor] = useState('#000000');
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const [mounted, setMounted] = useState(false);
-    const [name, setName] = useState('');
-
     const [colorPicker, setColorPicker] = useState(null);
 
+    //This is used to generate a unique color wheel to this component
     const pickerId = `picker${props.index}`;
+    //#endregion
 
+    //#region Effects
     useEffect(()=>{
         var colorPickerInst = new iro.ColorPicker(`#${pickerId}`,{width: 256});
         colorPickerInst.on('color:change', color=> {
@@ -107,7 +113,6 @@ export default function ColorPicker(props) {
         setColorPicker(colorPickerInst);
     },[]);
     
-
     useEffect(()=>{
         if (selectedIndex!==-1) {
            saveColor(selectedIndex);
@@ -120,7 +125,9 @@ export default function ColorPicker(props) {
             setSelectedIndex(colorList.length-1);
         } else setMounted(true);
     },[colorList.length])
-   
+    //#endregion
+
+    //#region Methods
     function renderColorList() {
         return colorList.map((color,i)=>{
             return <ColorButton key={i} color={(i===selectedIndex? selectedColor : color)} selected={i===selectedIndex} onClick={()=>selectColor(i,color)}/>
@@ -210,6 +217,7 @@ export default function ColorPicker(props) {
                 return blend(color1,color2,localProgress);
         }
     }
+    //#endregion
 
     return (
         <Container onMouseLeave={()=>setSelectedIndex(-1)}>
