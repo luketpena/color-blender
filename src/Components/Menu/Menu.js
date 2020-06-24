@@ -15,7 +15,7 @@ const MenuBar = styled.div`
         margin: 0;
     }
 
-    #file {
+    #file, #load-file {
         width: 0.1px;
         height: 0.1px;
         opacity: 0;
@@ -46,6 +46,8 @@ const MenuBar = styled.div`
     }
 `;
 
+const hexRegExp = /^#[0-9A-F]{6}$/i; 
+
 export default function Menu() {
 
     const dispatch = useDispatch();
@@ -53,6 +55,7 @@ export default function Menu() {
     const channels = useSelector(state=>state.channelsReducer);
 
     const importRef = useRef(null);
+    const loadRef = useRef(null);
 
     function exportFile() {
         let text = '';
@@ -105,7 +108,6 @@ export default function Menu() {
         }
 
         for (let i=0; i<contentArray.length; i++) {
-            var hexRegExp = /^#[0-9A-F]{6}$/i; 
             
             if (Array.isArray(contentArray[i].colors)) {
                 for (let color of contentArray[i].colors) {
@@ -128,15 +130,53 @@ export default function Menu() {
         }
     }
 
+    function interpretJsonLoad(content) {
+        const channelsArray = JSON.parse(content);
+
+        var newChannels = [];
+        for (var i=0; i<channelsArray.length; i++) {
+            let channelCopy = channelsArray[i];
+            
+
+            let newChannel = {
+                name: (('name' in channelCopy)? channelCopy.name : ''),
+                colors: (('colors' in channelCopy)? channelCopy.colors.map(color=> (hexRegExp.test(color))? color : '#ffffff' ) : []),
+                img_url: (('img_url' in channelCopy)? channelCopy.img_url : ''),
+                img_active: (('img_active' in channelCopy)? channelCopy.img_active : '')
+            }
+
+            newChannels.push(newChannel);
+        }
+        console.log(newChannels);
+        dispatch({type: 'SET_CHANNELS', payload: newChannels});
+        
+    }
+
     function saveFile() {
         let blob = new Blob([JSON.stringify(channels)], {type: "application/json"});
         saveAs(blob,"palette.json");
     }
 
+    function handleFileLoad(event) {
+        console.log('LOADING!');
+        
+        const file = event.target.files[0];
+        fileReader = new FileReader();
+        fileReader.onloadend = readFileJson;
+        fileReader.readAsText(file);
+    }
+
+    function readFileJson(e) {
+        const content = fileReader.result;
+        console.log(content);
+        interpretJsonLoad(content);
+    }
+
     return (
         <MenuBar>
             <button className="menu-item" onClick={saveFile}>Save</button>
-            <button className="menu-item" >Load</button>
+            <input type="file" name="load-file" id="load-file" accept="application/JSON" ref={loadRef} onChange={event=>handleFileLoad(event)}/>
+            <label className="menu-item" htmlFor="load-file">Load</label>
 
             <input type="file" name="file" id="file" accept="text/plain" ref={importRef} onChange={event=>handleFileImport(event)}/>
             <label className="menu-item" htmlFor="file">Import</label>
