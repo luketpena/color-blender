@@ -9,7 +9,7 @@ import blend from '../../Modules/blend';
 
 //#region Styling
 const Container = styled.div`
-    width: 256px;
+    width: max-content;
     background-color: #222;
     padding: 24px;
     border-radius: 16px;
@@ -30,7 +30,7 @@ const Container = styled.div`
         }
     }
 
-    .in-name, .in-colorHex {
+    .in-name, .in-colorHex, .in-imgUrl {
         width: 100%;
         margin-bottom: 16px;
         background: none;
@@ -51,7 +51,7 @@ const ColorBox = styled.div.attrs(props=>({
         backgroundColor: props.color,
     },
 }))`width: 250px;
-    height: 16px;
+    height: 24px;
     border-radius: 8px;
     margin: 8px 0;
     `;
@@ -90,7 +90,7 @@ const PickerBox = styled.div`
 const ModeBox = styled.div`
     margin-bottom: 16px;
     .active {
-        
+        cursor: pointer;
         &:hover {
             transform: scale(1.1);
             opacity: 1;
@@ -109,7 +109,6 @@ const ModeButton = styled.button`
     color: ${props=>(props.active? '#AAA' : '#888')};
     transition: all .1s;
     position: relative;
-    cursor: pointer;
 `;
 
 //#endregion
@@ -166,6 +165,27 @@ export default function ColorPicker(props) {
         return colorList.map((color,i)=>{
             return <ColorButton key={i} color={(i===selectedIndex? selectedColor : color)} selected={i===selectedIndex} onClick={()=>selectColor(i,color)}/>
         })
+    }
+
+    function renderModeDisplay() {
+        switch(imgActive) {
+            case true: 
+                return <input 
+                            type="text" 
+                            placeholder="Image URL" 
+                            className="in-imgUrl"
+                            value={channel.img_url}
+                            onChange={e=>{
+                                    let newImg = {
+                                        index: props.index,
+                                        img_url: e.target.value
+                                    }
+                                    dispatch({type: 'SET_CHANNEL_IMG', payload: newImg})
+                                }
+                            }
+                        />
+            case false: return <ColorBox color={getBlendedColor()} />;
+        }
     }
 
     function selectColor(i,color) {
@@ -267,6 +287,12 @@ export default function ColorPicker(props) {
             }
         }
     }
+
+    function toggleImg(value) {
+        setImgActive(value);
+        dispatch({type: 'SET_CHANNEL_IMG_ACTIVE', payload: {index: props.index, img_active: imgActive}})
+    }
+
     //#endregion
 
     return (
@@ -284,10 +310,10 @@ export default function ColorPicker(props) {
                 {renderColorList()}
             </ColorListBox>
             <button className={`btn btn-center ${(selectedIndex===-1? 'btn-disabled' : 'btn-active')}`} onClick={removeColor}>Remove Color</button>
-            <ColorBox color={getBlendedColor()} />
+            {renderModeDisplay()}
             <ModeBox>
-                <ModeButton className={`${(imgActive? 'active' : '')}`} active={imgActive} onClick={()=>setImgActive(false)}>Block</ModeButton>
-                <ModeButton className={`${(!imgActive? 'active' : '')}`} active={!imgActive} onClick={()=>setImgActive(true)}>Image</ModeButton>
+                <ModeButton className={`${(imgActive? 'active' : '')}`} active={imgActive} onClick={()=>toggleImg(false)}>Block</ModeButton>
+                <ModeButton className={`${(!imgActive? 'active' : '')}`} active={!imgActive} onClick={()=>toggleImg(true)}>Image</ModeButton>
             </ModeBox>
             <PickerBox id={pickerId}></PickerBox>
             <input 

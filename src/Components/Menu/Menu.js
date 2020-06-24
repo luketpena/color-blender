@@ -126,12 +126,21 @@ export default function Menu() {
         } else {
             alert('The file your imported is not valid. Please try another file.');
         }
-    }    
+    }
+
+    function saveFile() {
+        let blob = new Blob([JSON.stringify(channels)], {type: "application/json"});
+        saveAs(blob,"palette.json");
+    }
 
     return (
         <MenuBar>
+            <button className="menu-item" onClick={saveFile}>Save</button>
+            <button className="menu-item" >Load</button>
+
             <input type="file" name="file" id="file" accept="text/plain" ref={importRef} onChange={event=>handleFileImport(event)}/>
             <label className="menu-item" htmlFor="file">Import</label>
+            
             <button className="menu-item" onClick={exportFile}>Export</button>
             <button className="menu-item" onClick={resetChannels}>Reset Channels</button> 
         </MenuBar>
