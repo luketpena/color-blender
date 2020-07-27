@@ -15,16 +15,18 @@ const ChannelBox = styled.div`
 
 export default function App() {
 
+  //Setup
   const dispatch = useDispatch();
-
   const channels = useSelector(state=>state.channelsReducer);
 
+  //Renders the individual channel controls
   function renderChannels() {
     return channels.map( (channel,i)=>{
       return <ColorPicker key={i} channel={channel} index={i} />
     });
   }
 
+  //Adds a new channel to the list
   function addChannel() {
     dispatch({type: 'ADD_CHANNEL'});
   }

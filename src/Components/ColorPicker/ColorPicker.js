@@ -121,7 +121,6 @@ export default function ColorPicker(props) {
 
         /*--------< REDUCERS >--------*/
         const progress = useSelector(state=>state.progressReducer);
-        const channels = useSelector(state=>state.channelsReducer);
         const channel = useSelector(state=>state.channelsReducer[props.index]);
         const colorList = useSelector(state=>state.channelsReducer[props.index].colors);
 
@@ -137,15 +136,17 @@ export default function ColorPicker(props) {
         const pickerId = `picker${props.index}`;
     //#endregion
 
-    //#region Effects
+    //#region useEffects
+        //This useEffect initiates the color picker on first render and sets up the listener
         useEffect(()=>{
             var colorPickerInst = new iro.ColorPicker(`#${pickerId}`,{width: 256});
             colorPickerInst.on('color:change', color=> {
                 setSelectedColor(color.hexString);
             });
-            setColorPicker(colorPickerInst);
+            setColorPicker(colorPickerInst);           
         },[]);
         
+        //This useEffect updates the saved color if a color on a channel is selected
         useEffect(()=>{
             setColorHex(selectedColor);
             if (selectedIndex!==-1) {
@@ -153,6 +154,7 @@ export default function ColorPicker(props) {
             }
         },[selectedColor]);
 
+        //This useEffect watches for when a new color is added and then auto-selects that color
         useEffect(()=>{
             if (mounted) {
                 setSelectedColor(colorList[colorList.length-1]);
@@ -162,12 +164,15 @@ export default function ColorPicker(props) {
     //#endregion
 
     //#region Methods
+
+    //Draws all of the color circle-buttons
     function renderColorList() {
         return colorList.map((color,i)=>{
             return <ColorButton key={i} color={(i===selectedIndex? selectedColor : color)} selected={i===selectedIndex} onClick={()=>selectColor(i,color)}/>
         })
     }
 
+    //
     function selectColor(i,color) {
         if (selectedIndex!==i) {
             if (selectedIndex!==-1) {
@@ -189,7 +194,8 @@ export default function ColorPicker(props) {
             dispatch({type: 'SET_CHANNEL_NAME', payload: {index: props.index, name: event.target.value}})
         }
     }
-
+    
+    //This function targets a channel by index and a color within that channel by index to update.
     function saveColor(i) {
         let newColor = {
             channelIndex: props.index,
@@ -199,28 +205,22 @@ export default function ColorPicker(props) {
         dispatch({type: 'UPDATE_COLOR', payload: newColor});
     }
 
+    //Adds a new blank color, defaults to white
     function addColor() {
-        var channelCopy = {...channel};
-        channelCopy.colors.push('#ffffff');
-
-        updateChannel(channelCopy);
+        dispatch({type: 'ADD_COLOR', payload: {channelIndex: props.index} })
     }
 
+    //Removes a color from the channel, targeting by indices
     function removeColor() {
         if (selectedIndex!==-1) {
-            var channelCopy = {...colorList};
-            channelCopy.colors.splice(selectedIndex,1);
-
-            updateChannel(channelCopy);
+          dispatch({type: 'REMOVE_COLOR', payload: {
+            channelIndex: props.index,
+            colorIndex: selectedIndex
+          }});
         }
     }
 
-    function updateChannel(newVersion) {
-        var listCopy = [...channels];
-        listCopy[props.index] = newVersion;
-        dispatch({type: 'SET_CHANNELS', payload: listCopy});
-    }
-
+    //Deletes the entire channel
     function removeChannel() {
         let q = window.confirm("Do you want to remove this channel?");
         if (q) {
@@ -228,31 +228,41 @@ export default function ColorPicker(props) {
         }
     }
 
+    /*
+      This function returns the color interpolated throughout the loop of colors based on the 
+      position of the global progress bar
+    */
     function getBlendedColor() {
         switch(colorList.length) {
             case 0: return '#FFFFFF';
             case 1: return colorList[0];
             default:
+                //Figure out which step we are currently on
                 let currentUnit = Math.floor((colorList.length) * progress);
                 currentUnit = Math.min(currentUnit, colorList.length-1); 
                 
-
+                //Set blank colors
                 let color1 = ''; 
                 let color2 = '';
 
+                //Determine which two colors should be used
                 if (currentUnit===colorList.length-1) {
+                    //When on the final color, loop to the first color
                     color1 = colorList[colorList.length-1];
                     color2 = colorList[0];
                 } else {
+                    //Use the currentUnit and the upcoming unit
                     color1 = colorList[currentUnit];
                     color2 = colorList[currentUnit+1];
                 }
 
+                //Use *math* to find out the progress within the current step using modulo
                 let localProgress = Math.min((colorList.length) * progress, colorList.length-.01) % 1;             
                 return blend(color1,color2,localProgress);
         }
     }
 
+    //Updates the color based on the typed hex value
     function handleColorHexChange(event) {
         let color = event.target.value;
 
