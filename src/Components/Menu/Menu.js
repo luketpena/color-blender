@@ -49,9 +49,7 @@ const MenuBar = styled.div`
 export default function Menu() {
 
     const dispatch = useDispatch();
-
     const channels = useSelector(state=>state.channelsReducer);
-
     const importRef = useRef(null);
 
     function exportFile() {
