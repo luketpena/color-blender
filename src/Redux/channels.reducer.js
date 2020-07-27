@@ -3,6 +3,7 @@ function Channel(index) {
     this.name = `channel_${index}`;
     this.colors = ['#ffffff'];
     this.img_url = '';
+    this.img_active = false;
 }
 
 /*
@@ -30,7 +31,10 @@ const reducer = (state=[new Channel(0)], action)=>{
             let setImgCopy = [...state];
             setImgCopy[action.payload.index].img_url = action.payload.img_url;
             return setImgCopy;
-
+        case 'SET_CHANNEL_IMG_ACTIVE':
+            let setImgActiveCopy = [...state];
+            setImgActiveCopy[action.payload.index].img_active = action.payload.img_active;
+            return setImgActiveCopy;
         case 'UPDATE_COLOR':
             let updateColorCopy = [...state];
             updateColorCopy[action.payload.channelIndex].colors[action.payload.colorIndex] = action.payload.color;
