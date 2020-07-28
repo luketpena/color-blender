@@ -24,8 +24,7 @@ const PlayBox = styled.div`
         &:hover {
             transform: scale(1.2);
         }
-    }
-    
+    } 
 `;
 
 const SpeedList = styled.div`
@@ -49,6 +48,7 @@ const SpeedIcon = styled.div`
     }
 `;
 
+//These speed rates are arbitrary
 const speedList = [
     .0001,
     .001,
@@ -65,21 +65,22 @@ export default function ProgressControl() {
     const [localProgress, setLocalProgress] = useState(progress);
     const [speed, setSpeed] = useState(0);
 
+    //Updates the interval it iterates at when listening to the play button and rate of speed
     useEffect(()=>{
         const interval = setInterval(()=>{
             if (play) setLocalProgress(progress => (progress+speedList[speed]) % 1);
-
         },10);
         return ()=> clearInterval(interval);
     },[play, speed]);
 
+    //When the local bar updates, it pushes that update to the reducer for channels to listen to
     useEffect(()=>{
         dispatch({type: 'SET_PROGRESS', payload: localProgress});        
     },[localProgress])
 
-
+    //Handles manual changes made by the user on the slider bar
     function handleProgressChange(event) {
-        dispatch({type: 'SET_PROGRESS', payload: event.target.value})
+      setLocalProgress(Number(event.target.value));      
     }
 
     return (
